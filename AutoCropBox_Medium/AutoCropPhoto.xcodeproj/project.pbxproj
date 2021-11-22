@@ -13,6 +13,9 @@
 		3E31E00D247FF5D800EEF57B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E31E00B247FF5D800EEF57B /* Main.storyboard */; };
 		3E31E00F247FF5DA00EEF57B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E31E00E247FF5DA00EEF57B /* Assets.xcassets */; };
 		3E31E012247FF5DA00EEF57B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E31E010247FF5DA00EEF57B /* LaunchScreen.storyboard */; };
+		635AD52B274BA2C0000BAFF9 /* PSCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 635AD52A274BA2C0000BAFF9 /* PSCamera.m */; };
+		635AD52E274BA487000BAFF9 /* UIImage+FixOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 635AD52D274BA486000BAFF9 /* UIImage+FixOrientation.m */; };
+		635AD531274BA4B6000BAFF9 /* LLSimpleCamera+Helper.m in Sources */ = {isa = PBXBuildFile; fileRef = 635AD52F274BA4B6000BAFF9 /* LLSimpleCamera+Helper.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +27,13 @@
 		3E31E00E247FF5DA00EEF57B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3E31E011247FF5DA00EEF57B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3E31E013247FF5DA00EEF57B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		635AD528274BA2BF000BAFF9 /* AutoCropPhoto-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AutoCropPhoto-Bridging-Header.h"; sourceTree = "<group>"; };
+		635AD529274BA2C0000BAFF9 /* PSCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PSCamera.h; sourceTree = "<group>"; };
+		635AD52A274BA2C0000BAFF9 /* PSCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PSCamera.m; sourceTree = "<group>"; };
+		635AD52C274BA486000BAFF9 /* UIImage+FixOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FixOrientation.h"; sourceTree = "<group>"; };
+		635AD52D274BA486000BAFF9 /* UIImage+FixOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FixOrientation.m"; sourceTree = "<group>"; };
+		635AD52F274BA4B6000BAFF9 /* LLSimpleCamera+Helper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "LLSimpleCamera+Helper.m"; sourceTree = "<group>"; };
+		635AD530274BA4B6000BAFF9 /* LLSimpleCamera+Helper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "LLSimpleCamera+Helper.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +66,12 @@
 		3E31E004247FF5D800EEF57B /* AutoCropPhoto */ = {
 			isa = PBXGroup;
 			children = (
+				635AD52C274BA486000BAFF9 /* UIImage+FixOrientation.h */,
+				635AD52D274BA486000BAFF9 /* UIImage+FixOrientation.m */,
+				635AD529274BA2C0000BAFF9 /* PSCamera.h */,
+				635AD52A274BA2C0000BAFF9 /* PSCamera.m */,
+				635AD530274BA4B6000BAFF9 /* LLSimpleCamera+Helper.h */,
+				635AD52F274BA4B6000BAFF9 /* LLSimpleCamera+Helper.m */,
 				3E31E005247FF5D800EEF57B /* AppDelegate.swift */,
 				3E31E007247FF5D800EEF57B /* SceneDelegate.swift */,
 				3E31E009247FF5D800EEF57B /* ViewController.swift */,
@@ -63,6 +79,7 @@
 				3E31E00E247FF5DA00EEF57B /* Assets.xcassets */,
 				3E31E010247FF5DA00EEF57B /* LaunchScreen.storyboard */,
 				3E31E013247FF5DA00EEF57B /* Info.plist */,
+				635AD528274BA2BF000BAFF9 /* AutoCropPhoto-Bridging-Header.h */,
 			);
 			path = AutoCropPhoto;
 			sourceTree = "<group>";
@@ -99,6 +116,7 @@
 				TargetAttributes = {
 					3E31E001247FF5D800EEF57B = {
 						CreatedOnToolsVersion = 11.5;
+						LastSwiftMigration = 1310;
 					};
 				};
 			};
@@ -138,8 +156,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				635AD531274BA4B6000BAFF9 /* LLSimpleCamera+Helper.m in Sources */,
 				3E31E00A247FF5D800EEF57B /* ViewController.swift in Sources */,
+				635AD52B274BA2C0000BAFF9 /* PSCamera.m in Sources */,
 				3E31E006247FF5D800EEF57B /* AppDelegate.swift in Sources */,
+				635AD52E274BA487000BAFF9 /* UIImage+FixOrientation.m in Sources */,
 				3E31E008247FF5D800EEF57B /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,6 +305,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7FB27R6U4J;
 				INFOPLIST_FILE = AutoCropPhoto/Info.plist;
@@ -292,8 +314,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sal.AutoCropPhoto;
+				PRODUCT_BUNDLE_IDENTIFIER = crop.yousef.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AutoCropPhoto/AutoCropPhoto-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -303,6 +327,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 7FB27R6U4J;
 				INFOPLIST_FILE = AutoCropPhoto/Info.plist;
@@ -311,8 +336,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sal.AutoCropPhoto;
+				PRODUCT_BUNDLE_IDENTIFIER = crop.yousef.com;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "AutoCropPhoto/AutoCropPhoto-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

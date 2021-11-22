@@ -10,81 +10,63 @@ import UIKit
 import AVFoundation
 import Vision
 
-class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDelegate {
+class ViewController: UIViewController, CameraDelegate {
     
     @IBOutlet weak var previewView: UIView!
     @IBOutlet weak var capturedImageView: UIImageView!
     @IBOutlet weak var takePhotoBtn: UIButton!
-    
-    private let captureSession = AVCaptureSession()
-    private lazy var previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
-    private let videoDataOutput = AVCaptureVideoDataOutput()
+    fileprivate var camera: PSCamera?
+
     
     private var maskLayer = CAShapeLayer()
     private var hintLayer = CATextLayer()
     private var isTapped = false
     
     override func viewDidAppear(_ animated: Bool) {
-        self.videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "camera_frame_processing_queue"))
-        self.captureSession.startRunning()
+
+        setDeviceOrientation(value: .landscapeRight)
+        self.setupCamera()
+
     }
     
     override func viewDidDisappear(_ animated: Bool) {
-        self.videoDataOutput.setSampleBufferDelegate(nil, queue: nil)
-        self.captureSession.stopRunning()
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        self.setCameraInput()
-        self.showCameraFeed()
-        self.setCameraOutput()
+    
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.previewLayer.frame = self.previewView.bounds
     }
     
-    private func setCameraInput() {
-        guard let device = AVCaptureDevice.DiscoverySession(
-            deviceTypes: [.builtInWideAngleCamera, .builtInDualCamera, .builtInTrueDepthCamera],
-            mediaType: .video,
-            position: .back).devices.first else {
-                fatalError("No back camera device found.")
+    private func setupCamera() {
+        camera = PSCamera(quality: AVCaptureSession.Preset.hd1920x1080.rawValue, position: LLCameraPositionRear, videoEnabled: false)
+        camera?.attach(to: self, withFrame: CGRect(x: 0, y: 0, width: view.bounds.size.width, height: view.bounds.size.height))
+        camera?.fixOrientationAfterCapture = true
+        
+        camera?.onError = { (camera, error) in
+            print(error.debugDescription)
         }
-        let cameraInput = try! AVCaptureDeviceInput(device: device)
-        self.captureSession.addInput(cameraInput)
+        camera?.delegate = self
+        self.camera?.start()
     }
+
     
-    private func showCameraFeed() {
-        self.previewLayer.videoGravity = .resizeAspectFill
-        self.previewView.layer.addSublayer(self.previewLayer)
-        self.previewLayer.frame = self.previewView.frame
-    }
-    
-    private func setCameraOutput() {
-        self.videoDataOutput.videoSettings = [(kCVPixelBufferPixelFormatTypeKey as NSString) : NSNumber(value: kCVPixelFormatType_32BGRA)] as [String : Any]
+    func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputSampleBuffer sampleBuffer: CMSampleBuffer!, from connection: AVCaptureConnection!) {
         
-        self.videoDataOutput.alwaysDiscardsLateVideoFrames = true
-        self.videoDataOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "c"))
-        self.captureSession.addOutput(self.videoDataOutput)
-        
-        guard let connection = self.videoDataOutput.connection(with: AVMediaType.video),
-            connection.isVideoOrientationSupported else { return }
-        
-        connection.videoOrientation = .portrait
-    }
-    
-    func captureOutput(_ output: AVCaptureOutput,didOutput sampleBuffer: CMSampleBuffer,from connection: AVCaptureConnection) {
+        if (connection.isVideoOrientationSupported) {
+            connection.videoOrientation = AVCaptureVideoOrientation.landscapeRight
+        }
         guard let frame = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-            return
-        }
-        
-        self.detectRectangle(in: frame)
+                 return
+             }
+     
+     
+     
+             self.detectRectangle(in: frame)
     }
-    
     private func detectRectangle(in image: CVPixelBuffer) {
         let request = VNDetectRectanglesRequest(completionHandler: { (request: VNRequest?, error: Error?) in
             DispatchQueue.main.async {
@@ -102,7 +84,8 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 
                 
                 guard let rect = results.first else{
-                    self.createLayerHint(in: CGRect(x:self.previewView.bounds.width*0.1 , y: self.previewLayer.bounds.height*0.07, width: self.previewView.bounds.width*0.8 , height: self.previewLayer.bounds.height*0.04), color: UIColor.systemRed.cgColor, text: "Can't Detect Rectangle: Change background Or Adjust Angle")
+                    guard let previewLayer = self.camera?.getPreviewLayer() else {return}
+                    self.createLayerHint(in: CGRect(x:self.previewView.bounds.width*0.1 , y: previewLayer.bounds.height*0.07, width: previewLayer.bounds.width*0.8 , height: previewLayer.bounds.height*0.04), color: UIColor.systemRed.cgColor, text: "Can't Detect Rectangle: Change background Or Adjust Angle")
                     return}
                 let diffXTop = Float((rect.topLeft.x - rect.topRight.x))
                 let diffYTop = Float((rect.topLeft.y - rect.topRight.y))
@@ -111,7 +94,6 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 let diffYBottom = Float((rect.bottomLeft.y - rect.bottomRight.y))
                 let distanceBottom = Float(hypotf(diffXBottom,diffYBottom))
                 
-                print("distance: \(distanceTop) + \(distanceBottom)")
                 
                 if( distanceTop < 0.5 ){
                     self.drawBoundingBox(rect: rect, color: UIColor.systemRed.cgColor, text: "Move Closer")
@@ -119,7 +101,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
                 else if(distanceTop > 0.9 ){
                     self.drawBoundingBox(rect: rect, color: UIColor.systemRed.cgColor, text: "Move Away")
                 }
-                else if(abs(distanceTop - distanceBottom) > 0.55 ){
+                else if(abs(distanceTop - distanceBottom) > 0.45 ){
                     self.drawBoundingBox(rect: rect, color: UIColor.systemRed.cgColor, text: "Adjust Angle")
                 }
                 else {
@@ -133,7 +115,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
             }
         })
         
-        request.minimumAspectRatio = VNAspectRatio(0.3)
+        request.minimumAspectRatio = VNAspectRatio(0.1)
         request.maximumAspectRatio = VNAspectRatio(0.9)
         request.minimumSize = Float(0.3)
         request.quadratureTolerance = VNDegrees(30)
@@ -154,11 +136,12 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
     
     func drawBoundingBox(rect : VNRectangleObservation , color: CGColor, text:String) {
-        let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -self.previewLayer.bounds.height)
-        let topTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: self.previewView.bounds.width*0.25, y: -self.previewLayer.bounds.height*0.1)
+        guard let previewLayer = self.camera?.getPreviewLayer() else {return}
+        let transform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x: 0, y: -previewLayer.bounds.height)
+        let topTransform = CGAffineTransform(scaleX: 1, y: -1).translatedBy(x:  previewLayer.bounds.width*0.25, y: -previewLayer.bounds.height*0.1)
         
-        let scale = CGAffineTransform.identity.scaledBy(x: self.previewLayer.bounds.width, y: self.previewLayer.bounds.height)
-        let topScale = CGAffineTransform.identity.scaledBy(x: self.previewLayer.bounds.width*0.5, y: self.previewLayer.bounds.height*0.1)
+        let scale = CGAffineTransform.identity.scaledBy(x: previewLayer.bounds.width, y: previewLayer.bounds.height)
+        let topScale = CGAffineTransform.identity.scaledBy(x: previewLayer.bounds.width*0.5, y: previewLayer.bounds.height*0.1)
         
         let bounds = rect.boundingBox.applying(scale).applying(transform)
         let top = rect.boundingBox.applying(topScale).applying(topTransform)
@@ -167,6 +150,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     }
     
     private func createLayer(in rect: CGRect, color:CGColor) {
+        guard let previewLayer = self.camera?.getPreviewLayer() else {return}
         maskLayer = CAShapeLayer()
         maskLayer.frame = rect
         maskLayer.cornerRadius = 0
@@ -177,6 +161,7 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
         
     }
     private func createLayerHint(in rect: CGRect, color:CGColor, text: String) {
+        guard let previewLayer = self.camera?.getPreviewLayer() else {return}
         hintLayer = CATextLayer()
         hintLayer.fontSize = 15
         hintLayer.frame = rect
@@ -198,6 +183,17 @@ class ViewController: UIViewController, AVCaptureVideoDataOutputSampleBufferDele
     
     @IBAction func didTakePhoto(_ sender: UIButton) {
         self.isTapped = true
+    }
+    
+    func setDeviceOrientation(value: UIInterfaceOrientation){
+        UIDevice.current.setValue(value.rawValue, forKey: "orientation")
+        UIViewController.attemptRotationToDeviceOrientation()
+    }
+    
+    override func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
+        if UIDevice.current.orientation != .landscapeRight && UIDevice.current.orientation != .landscapeLeft {
+            setDeviceOrientation(value: .landscapeRight)
+        }
     }
     
     func imageExtraction(_ observation: VNRectangleObservation, from buffer: CVImageBuffer) -> UIImage {
